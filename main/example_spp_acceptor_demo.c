@@ -121,9 +121,10 @@ static void esp_spp_cb(esp_spp_cb_event_t event, esp_spp_cb_param_t *param){
         esp_log_buffer_char("Received String Data",param->data_ind.data,param->data_ind.len);
         
         saveReceivedData(param->data_ind.data,param->data_ind.len);
+
         printf("\n\n\n");
-        printf("%s", charArrayLastReceivedData);
         printf("\n\n\n");
+
         if (strncmp(charArrayLastReceivedData, "AT@1",4) == 0)
         {
             char * c = "OBDII to RS232 Interpreter>\r";
@@ -229,11 +230,10 @@ static void esp_spp_cb(esp_spp_cb_event_t event, esp_spp_cb_param_t *param){
             uint8_t * u = (uint8_t *)c;
             esp_spp_write(param->srv_open.handle, 15, u);
 
-        }else if (strncmp(charArrayLastReceivedData, "ATZ", 4) == 0)
+        }else if (strncmp(charArrayLastReceivedData, "ATZ", 3) == 0)
         {
             char * c = "ELM327 v2.1>\r";
             uint8_t * u = (uint8_t *)c;
-            //vTaskDelay(500);
             esp_spp_write(param->srv_open.handle, 15, u);
 
         }else if (strncmp(charArrayLastReceivedData, "ATST", 4) == 0)
@@ -243,9 +243,21 @@ static void esp_spp_cb(esp_spp_cb_event_t event, esp_spp_cb_param_t *param){
             esp_spp_write(param->srv_open.handle, 4, u);
         }else if (strncmp(charArrayLastReceivedData, "0100", 4) == 0)
         {
-            char * c = "SEARCHING... 41 00 BE 1B 30 13\n1: 06 41 00 88 18 00 10\n2: 06 41 00 80 08 00 10>\r";
+            char * c = "SEARCHING...\r";
             uint8_t * u = (uint8_t *)c;
-            esp_spp_write(param->srv_open.handle, 81, u);
+            esp_spp_write(param->srv_open.handle, 13, u);
+            char * d = "7EA 06 41 00 98 3A 80 13 \r";
+            uint8_t * v = (uint8_t *)d;
+            esp_spp_write(param->srv_open.handle, 26, v);
+            char * e = "7E0 06 41 00 BE 3F A8 13 \r>\r";
+            uint8_t * w = (uint8_t *)e;
+            esp_spp_write(param->srv_open.handle, 26, w);
+            // char * f = "41 00 00 08 00 10\n\r\0";
+            // uint8_t * x = (uint8_t *)f;
+            // esp_spp_write(param->srv_open.handle, 20, x);
+            // char * g = ">\n\r\0";
+            // uint8_t * y = (uint8_t *)g;
+            // esp_spp_write(param->srv_open.handle, 4, y);
         }else if (strncmp(charArrayLastReceivedData, "0103", 4) == 0)
         {
             char * c = "7E8 04 41 03 00 00>\r";
@@ -277,13 +289,6 @@ static void esp_spp_cb(esp_spp_cb_event_t event, esp_spp_cb_param_t *param){
             uint8_t * u = (uint8_t *)c;
             esp_spp_write(param->srv_open.handle, 21, u);
         }
-
-        
-
-        
-
- 
- 
         break;
     case ESP_SPP_CONG_EVT:
         ESP_LOGI(SPP_TAG, "ESP_SPP_CONG_EVT");
